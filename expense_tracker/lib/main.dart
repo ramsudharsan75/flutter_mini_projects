@@ -56,14 +56,6 @@ class _MyHomePageState extends State<MyHomePage> {
   final List<Transaction> _userTransactions = [];
   var _showChart = false;
 
-  List<Transaction> get _recentTransactions {
-    var afterDate = DateTime.now().subtract(const Duration(days: 7));
-
-    return _userTransactions.where((tx) {
-      return tx.date.isAfter(afterDate);
-    }).toList();
-  }
-
   void _addNewTransaction(String title, double amount, DateTime chosenDate) {
     final newTx = Transaction(
       id: DateTime.now().toString(),
@@ -92,11 +84,58 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final mediaQuery = MediaQuery.of(context);
-    final isLandscape = mediaQuery.orientation == Orientation.landscape;
-    final PreferredSizeWidget appBar = Platform.isIOS
+  List<Widget> _buildLandscapeContent(mediaQuery, appBar, txListWidget) {
+    return [
+      Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            'Show Chart',
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
+          Switch.adaptive(
+              value: _showChart,
+              activeColor: Theme.of(context).colorScheme.primary,
+              onChanged: (on) {
+                setState(() {
+                  _showChart = on;
+                });
+              })
+        ],
+      ),
+      _showChart
+          ? SizedBox(
+              height: (mediaQuery.size.height -
+                      appBar.preferredSize.height -
+                      mediaQuery.padding.top) *
+                  0.7,
+              child: Chart(_recentTransactions))
+          : txListWidget
+    ];
+  }
+
+  List<Transaction> get _recentTransactions {
+    var afterDate = DateTime.now().subtract(const Duration(days: 7));
+
+    return _userTransactions.where((tx) {
+      return tx.date.isAfter(afterDate);
+    }).toList();
+  }
+
+  List<Widget> _buildPortraitContent(mediaQuery, appBar, txListWidget) {
+    return [
+      SizedBox(
+          height: (mediaQuery.size.height -
+                  appBar.preferredSize.height -
+                  mediaQuery.padding.top) *
+              0.3,
+          child: Chart(_recentTransactions)),
+      txListWidget
+    ];
+  }
+
+  PreferredSizeWidget _buildAppBar(BuildContext context) {
+    return Platform.isIOS
         ? CupertinoNavigationBar(
             middle: const Text('Personal Expenses'),
             trailing: Row(
@@ -120,7 +159,15 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
             ],
           );
-    final txList = SizedBox(
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final mediaQuery = MediaQuery.of(context);
+    final isLandscape = mediaQuery.orientation == Orientation.landscape;
+    final appBar = _buildAppBar(context);
+
+    final txListWidget = SizedBox(
         height: (mediaQuery.size.height -
                 appBar.preferredSize.height -
                 mediaQuery.padding.top) *
@@ -133,40 +180,9 @@ class _MyHomePageState extends State<MyHomePage> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           if (isLandscape)
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  'Show Chart',
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-                Switch.adaptive(
-                    value: _showChart,
-                    activeColor: Theme.of(context).colorScheme.primary,
-                    onChanged: (on) {
-                      setState(() {
-                        _showChart = on;
-                      });
-                    })
-              ],
-            ),
+            ..._buildLandscapeContent(mediaQuery, appBar, txListWidget),
           if (!isLandscape)
-            SizedBox(
-                height: (mediaQuery.size.height -
-                        appBar.preferredSize.height -
-                        mediaQuery.padding.top) *
-                    0.3,
-                child: Chart(_recentTransactions)),
-          if (!isLandscape) txList,
-          if (isLandscape)
-            _showChart
-                ? SizedBox(
-                    height: (mediaQuery.size.height -
-                            appBar.preferredSize.height -
-                            mediaQuery.padding.top) *
-                        0.7,
-                    child: Chart(_recentTransactions))
-                : txList,
+            ..._buildPortraitContent(mediaQuery, appBar, txListWidget),
         ],
       ),
     ));
