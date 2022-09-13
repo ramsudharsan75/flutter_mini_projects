@@ -34,7 +34,7 @@ class Result extends StatelessWidget {
           ),
           OutlinedButton(
             style: OutlinedButton.styleFrom(
-              primary: Colors.blue,
+              foregroundColor: Colors.blue,
               side: const BorderSide(
                 color: Colors.blue,
               ),
