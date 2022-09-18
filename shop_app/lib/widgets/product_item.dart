@@ -23,8 +23,13 @@ class ProductItem extends StatelessWidget {
               color: Theme.of(context).colorScheme.secondary,
               icon: Icon(
                   value.isFavorite ? Icons.favorite : Icons.favorite_border),
-              onPressed: () {
-                value.toggleFavoriteStatus();
+              onPressed: () async {
+                try {
+                  await value.toggleFavoriteStatus();
+                } catch (err) {
+                  ScaffoldMessenger.of(ctx)
+                      .showSnackBar(SnackBar(content: Text(err.toString())));
+                }
               },
             ),
           ),
