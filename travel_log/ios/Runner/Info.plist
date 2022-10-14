@@ -14,6 +14,12 @@
 	<string>6.0</string>
 	<key>CFBundleName</key>
 	<string>travel_log</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Need to get your location!</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>Need to get your location!</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Need to get your location!</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
