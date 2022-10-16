@@ -4,8 +4,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import './models/transaction.dart';
-import './/widgets/new_transaction.dart';
-import './/widgets/transaction_list.dart';
+import './widgets/new_transaction.dart';
+import './widgets/transaction_list.dart';
 import './widgets/chart.dart';
 
 void main(List<String> args) {

@@ -16,18 +16,26 @@ class ChatScreen extends StatelessWidget {
           if (streamSnapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
+          final documents = streamSnapshot.data?.docs;
+
           return ListView.builder(
-            itemCount: streamSnapshot.data?.docs.length,
+            itemCount: documents?.length,
             itemBuilder: (ctx, index) => Container(
               padding: const EdgeInsets.all(8),
-              child: Text('This Works!'),
+              child: Text(documents?[index]['text']),
             ),
           );
         },
       ),
       floatingActionButton: FloatingActionButton(
         child: const Icon(Icons.add),
-        onPressed: () {},
+        onPressed: () {
+          FirebaseFirestore.instance
+              .collection('chats/H8QbA5gBFnuXy1OHnDQ4/messages')
+              .add({
+            'text': 'This was added by button click',
+          });
+        },
       ),
     );
   }
