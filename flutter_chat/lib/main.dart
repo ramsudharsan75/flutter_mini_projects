@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import './screens/chat_screen.dart';
 import './screens/auth_screen.dart';
+import './screens/splash_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -17,7 +19,6 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Chat',
       theme: ThemeData(
-        backgroundColor: Colors.pink,
         scaffoldBackgroundColor: Colors.pink,
         colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.pink)
             .copyWith(secondary: Colors.deepPurple),
@@ -27,6 +28,11 @@ class MyApp extends StatelessWidget {
                 borderRadius: BorderRadius.circular(20))),
           ),
         ),
+        textTheme: const TextTheme(
+          bodyMedium: TextStyle(
+            color: Colors.white,
+          ),
+        ),
       ),
       home: FutureBuilder(
         future: Firebase.initializeApp(
@@ -34,12 +40,17 @@ class MyApp extends StatelessWidget {
         ),
         builder: (ctx, snapshot) =>
             snapshot.connectionState == ConnectionState.waiting
-                ? const Scaffold(
-                    body: Center(
-                      child: CircularProgressIndicator(),
-                    ),
-                  )
-                : const AuthScreen(),
+                ? const SplashScreen()
+                : StreamBuilder(
+                    stream: FirebaseAuth.instance.authStateChanges(),
+                    builder: (ctx, userSnapshot) {
+                      if (userSnapshot.hasData) {
+                        return const ChatScreen();
+                      } else {
+                        return const AuthScreen();
+                      }
+                    },
+                  ),
       ),
     );
   }

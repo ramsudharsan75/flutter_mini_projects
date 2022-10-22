@@ -1,13 +1,19 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+
+import '../../pickers/user_image_picker.dart';
 
 class AuthForm extends StatefulWidget {
   final void Function(
       {required String email,
       required String password,
       String? username,
+      File? image,
       required bool isLogin}) submitFn;
+  final bool isLoading;
 
-  const AuthForm(this.submitFn, {super.key});
+  const AuthForm(this.submitFn, this.isLoading, {super.key});
 
   @override
   State<AuthForm> createState() => _AuthFormState();
@@ -19,18 +25,35 @@ class _AuthFormState extends State<AuthForm> {
   var _userEmail = '';
   var _userName = '';
   var _userPassword = '';
+  File? _userImageFile;
+
+  void _pickedImage(File image) {
+    _userImageFile = image;
+  }
 
   void _trySubmit() {
     final isValid = _formKey.currentState!.validate();
     FocusScope.of(context).unfocus();
 
+    if (_userImageFile == null && !_isLogin) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Please pick an image'),
+          backgroundColor: Theme.of(context).colorScheme.error,
+        ),
+      );
+      return;
+    }
+
     if (isValid) {
       _formKey.currentState!.save();
       widget.submitFn(
-          email: _userEmail,
-          isLogin: _isLogin,
-          password: _userPassword,
-          username: _userName);
+        email: _userEmail.trim(),
+        isLogin: _isLogin,
+        password: _userPassword.trim(),
+        username: _userName.trim(),
+        image: _userImageFile,
+      );
       // Use those values to send our auth request to firebase
     }
   }
@@ -46,8 +69,15 @@ class _AuthFormState extends State<AuthForm> {
           child: Form(
             key: _formKey,
             child: Column(mainAxisSize: MainAxisSize.min, children: [
+              if (!_isLogin)
+                UserImagePicker(
+                  imagePickFn: _pickedImage,
+                ),
               TextFormField(
                 key: const ValueKey('email'),
+                autocorrect: false,
+                textCapitalization: TextCapitalization.none,
+                enableSuggestions: false,
                 onSaved: (newValue) {
                   _userEmail = newValue!;
                 },
@@ -81,6 +111,7 @@ class _AuthFormState extends State<AuthForm> {
               if (!_isLogin)
                 TextFormField(
                   key: const ValueKey('username'),
+                  enableSuggestions: false,
                   onSaved: (newValue) {
                     _userName = newValue!;
                   },
@@ -97,20 +128,23 @@ class _AuthFormState extends State<AuthForm> {
               const SizedBox(
                 height: 12,
               ),
-              ElevatedButton(
-                onPressed: _trySubmit,
-                child: _isLogin ? const Text('Login') : const Text('Signup'),
-              ),
-              TextButton(
-                onPressed: () {
-                  setState(() {
-                    _isLogin = !_isLogin;
-                  });
-                },
-                child: _isLogin
-                    ? const Text('Create new account')
-                    : const Text('I already have an account'),
-              )
+              if (widget.isLoading) const CircularProgressIndicator(),
+              if (!widget.isLoading)
+                ElevatedButton(
+                  onPressed: _trySubmit,
+                  child: _isLogin ? const Text('Login') : const Text('Signup'),
+                ),
+              if (!widget.isLoading)
+                TextButton(
+                  onPressed: () {
+                    setState(() {
+                      _isLogin = !_isLogin;
+                    });
+                  },
+                  child: _isLogin
+                      ? const Text('Create new account')
+                      : const Text('I already have an account'),
+                )
             ]),
           ),
         ),
