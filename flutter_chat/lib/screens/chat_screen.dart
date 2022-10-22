@@ -17,11 +17,9 @@ class _ChatScreenState extends State<ChatScreen> {
   void initState() {
     super.initState();
     FirebaseMessaging.onMessage.listen((message) {
-      print(message);
       return;
     });
     FirebaseMessaging.onBackgroundMessage((message) {
-      print(message);
       return Future(() {});
     });
     FirebaseMessaging.instance.subscribeToTopic('chat');

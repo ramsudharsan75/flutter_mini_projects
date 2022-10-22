@@ -65,8 +65,6 @@ class _AuthScreenState extends State<AuthScreen> {
         backgroundColor: Theme.of(context).errorColor,
       );
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
-    } catch (e) {
-      print(e);
     } finally {
       setState(() {
         _isLoading = false;
